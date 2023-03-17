@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoAPI.Models;
+using Microsoft.AspNetCore.Cors;
 
 namespace ToDoAPI.Controllers
 {
+    [EnableCors]
     [Route("api/[controller]")]
     [ApiController]
     public class ToDoesController : ControllerBase
