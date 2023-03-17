@@ -24,29 +24,42 @@ namespace ToDoAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ToDo>>> GetToDos()
         {
-          if (_context.ToDos == null)
-          {
-              return NotFound();
-          }
-            return await _context.ToDos.ToListAsync();
+            var Todos = await _context.ToDos.Include("Categories").Select(x => new ToDo()
+            {
+                ToDoId = x.ToDoId,
+                Name = x.Name, 
+                Done = x.Done, 
+                CategoryId = x.CategoryId,
+                Category = x.Category != null ? new Category() 
+                {
+                    CategoryId = x.Category.CategoryId, 
+                    CatName = x.Category.CatName,
+                    CatDesc = x.Category.CatDesc
+                } : null
+            }).ToListAsync();
+
+            return Ok(Todos);
         }
 
         // GET: api/ToDoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ToDo>> GetToDo(int id)
         {
-          if (_context.ToDos == null)
-          {
-              return NotFound();
-          }
-            var toDo = await _context.ToDos.FindAsync(id);
-
-            if (toDo == null)
+            var Todos = await _context.ToDos.Where(x => x.ToDoId == id).Include("Categories").Select(x => new ToDo()
             {
-                return NotFound();
-            }
+                ToDoId = x.ToDoId,
+                Name = x.Name,
+                Done = x.Done,
+                CategoryId = x.CategoryId,
+                Category = x.Category != null ? new Category()
+                {
+                    CategoryId = x.Category.CategoryId,
+                    CatName = x.Category.CatName,
+                    CatDesc = x.Category.CatDesc
+                } : null
+            }).FirstOrDefaultAsync();
 
-            return toDo;
+            return Ok(Todos);
         }
 
         // PUT: api/ToDoes/5
@@ -54,15 +67,15 @@ namespace ToDoAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutToDo(int id, ToDo toDo)
         {
-            if (id != toDo.ToDoId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(toDo).State = EntityState.Modified;
-
             try
             {
+                if (id != toDo.ToDoId)
+                {
+                    return BadRequest();
+                }
+
+                _context.Entry(toDo).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -85,13 +98,21 @@ namespace ToDoAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ToDo>> PostToDo(ToDo toDo)
         {
-          if (_context.ToDos == null)
-          {
-              return Problem("Entity set 'ToDoContext.ToDos'  is null.");
-          }
-            _context.ToDos.Add(toDo);
             try
             {
+                if (_context.ToDos == null)
+                  {
+                      return Problem("Entity set 'ToDoContext.ToDos'  is null.");
+                  }
+                //_context.ToDos.Add(toDo);
+                var newTodo = new ToDo()
+                {
+                    ToDoId = toDo.ToDoId,
+                    Name = toDo.Name,
+                    Done = toDo.Done,
+                    CategoryId = toDo.CategoryId
+                };
+                _context.ToDos.Add(newTodo);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
