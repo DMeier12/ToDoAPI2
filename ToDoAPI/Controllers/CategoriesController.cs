@@ -24,15 +24,14 @@ namespace ToDoAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
-            //var categories = await _context.Categories.Include("Category").Select(XmlConfigurationExtensions=> new Category()
-            //{
 
-            //} :null
+            var categories = await _context.Categories.ToListAsync();
+
           if (_context.Categories == null)
           {
               return NotFound();
           }
-            return await _context.Categories.ToListAsync();
+            return  Ok(categories);
         }
 
         // GET: api/Categories/5

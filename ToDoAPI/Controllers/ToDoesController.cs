@@ -13,37 +13,43 @@ namespace ToDoAPI.Controllers
     [EnableCors]
     [Route("api/[controller]")]
     [ApiController]
-    public class ToDoesController : ControllerBase
+    public class ToDosController : ControllerBase
     {
         private readonly ToDoContext _context;
 
-        public ToDoesController(ToDoContext context)
+        public ToDosController(ToDoContext context)
         {
             _context = context;
         }
 
-        // GET: api/ToDoes
+        // GET: api/ToDos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ToDo>>> GetToDos()
         {
-            var Todos = await _context.ToDos.Include("Categories").Select(x => new ToDo()
+            //var Todos = await _context.ToDos.Include("Categories").Select(x => new ToDo()
+            //{
+            //    ToDoId = x.ToDoId,
+            //    Name = x.Name, 
+            //    Done = x.Done, 
+            //    CategoryId = x.CategoryId,
+            //    Category = x.Category != null ? new Category() 
+            //    {
+            //        CategoryId = x.Category.CategoryId, 
+            //        CatName = x.Category.CatName,
+            //        CatDesc = x.Category.CatDesc
+            //    } : null
+            //}).ToListAsync();
+            var Todos = await _context.ToDos.ToListAsync();
+
+            if(_context.ToDos == null)
             {
-                ToDoId = x.ToDoId,
-                Name = x.Name, 
-                Done = x.Done, 
-                CategoryId = x.CategoryId,
-                Category = x.Category != null ? new Category() 
-                {
-                    CategoryId = x.Category.CategoryId, 
-                    CatName = x.Category.CatName,
-                    CatDesc = x.Category.CatDesc
-                } : null
-            }).ToListAsync();
+                return NotFound();
+            }
 
             return Ok(Todos);
         }
 
-        // GET: api/ToDoes/5
+        // GET: api/ToDos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ToDo>> GetToDo(int id)
         {
